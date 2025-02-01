@@ -99,32 +99,37 @@ export async function getMessages() {
   }
 
   export async function getSingleMessage(messageId: string) {
-
-    const { userId } = await auth();
-    if (!userId) {
-      throw new Error("You must be logged in to view messages.");
+    try {
+      const { userId } = await auth();
+      if (!userId) {
+        console.warn("No user ID found during message fetch.");
+        return null;
+      }
+  
+      const user = await prisma.user.findUnique({
+        where: { clerkId: userId },
+      });
+      if (!user) {
+        console.warn("User not found.");
+        return null;
+      }
+  
+      const message = await prisma.message.findUnique({
+        where: { id: messageId },
+        include: {
+          sender: true,
+          recipient: true,
+          property: true,
+        },
+      });
+  
+      return message;
+    } catch (error) {
+      console.error("Error fetching message:", error);
+      return null;
     }
-  
-    // Find the current user
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    });
-    if (!user) {
-      throw new Error("User not found.");
-    }
-  
-    // Get messages where user is either sender or recipient
-    const message = await prisma.message.findUnique({
-      where: { id: messageId },
-      include: {
-        sender: true,
-        recipient: true,
-        property: true,
-      },
-    });
-  
-    return message;
   }
+  
 
   export async function readMessage(messageId: string): Promise<ReadMessageResponse> {
     try {

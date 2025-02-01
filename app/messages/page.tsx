@@ -1,7 +1,7 @@
 import { getMessages } from '@/actions/message';
 import MessageCard from '@/components/message-card';
 import Link from 'next/link';
-import { FaEnvelope, FaUser, FaHome } from 'react-icons/fa';
+import { FaEnvelope,  } from 'react-icons/fa';
 
 const MessagesPage = async () => {
   const messages = await getMessages();
