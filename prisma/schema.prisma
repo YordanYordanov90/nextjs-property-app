@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String     @id @default(cuid())
+  clerkId          String     @unique
+  email            String     @unique
+  username         String
+  image            String?
+  bookmarks        Property[] @relation("UserBookmarks")
+  messagesSent     Message[]  @relation("MessageSender")
+  messagesReceived Message[]  @relation("MessageRecipient")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  Property Property[]
+}
+
+model Property {
+  id          String  @id @default(cuid())
+  ownerId     String
+  owner       User    @relation(fields: [ownerId], references: [id]) // Connects to User
+  name        String
+  type        String
+  description String?
+
+  bookmarkedBy User[] @relation("UserBookmarks")
+
+  // Embedded Location Fields
+  street  String
+  city    String
+  state   String
+  zipcode String
+
+  beds       Int
+  baths      Int
+  squareFeet Int
+  amenities  String[]
+
+  // Embedded Rates Fields
+  nightlyRate Int?
+  weeklyRate  Int?
+  monthlyRate Int?
+
+  // Embedded SellerInfo Fields
+  sellerName  String?
+  sellerEmail String?
+  sellerPhone String?
+
+  images     String[]
+  isFeatured Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  Message Message[]
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  sender      User     @relation("MessageSender", fields: [senderId], references: [id])
+  recipientId String
+  recipient   User     @relation("MessageRecipient", fields: [recipientId], references: [id])
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+  name        String
+  email       String
+  phone       String?
+  body        String?
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
