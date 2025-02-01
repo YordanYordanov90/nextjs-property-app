@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getMessages } from '@/actions/message';
 import MessageCard from '@/components/message-card';
 import Link from 'next/link';

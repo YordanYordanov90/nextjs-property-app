@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { Message, Property, User } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 type ReadMessageResponse = {
@@ -98,38 +99,44 @@ export async function getMessages() {
     return messages;
   }
 
-  export async function getSingleMessage(messageId: string) {
-    try {
-      const { userId } = await auth();
-      if (!userId) {
-        console.warn("No user ID found during message fetch.");
-        return null;
-      }
-  
-      const user = await prisma.user.findUnique({
-        where: { clerkId: userId },
-      });
-      if (!user) {
-        console.warn("User not found.");
-        return null;
-      }
-  
-      const message = await prisma.message.findUnique({
-        where: { id: messageId },
-        include: {
-          sender: true,
-          recipient: true,
-          property: true,
-        },
-      });
-  
-      return message;
-    } catch (error) {
-      console.error("Error fetching message:", error);
+  export async function getSingleMessage(messageId: string): Promise<
+  | (Message & { sender: User; recipient: User; property: Property })
+  | null
+> {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      console.warn("No user logged in.");
       return null;
     }
+
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
+
+    if (!user) {
+      console.warn("User not found.");
+      return null;
+    }
+
+    // Get the message
+    const message = await prisma.message.findUnique({
+      where: { id: messageId },
+      include: {
+        sender: true,
+        recipient: true,
+        property: true,
+      },
+    });
+
+    return message;
+  } catch (error) {
+    console.error("Error fetching message:", error);
+    return null;
   }
-  
+}
+
 
   export async function readMessage(messageId: string): Promise<ReadMessageResponse> {
     try {
