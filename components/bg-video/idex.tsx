@@ -1,5 +1,6 @@
+export const dynamic = "force-dynamic";
 import { checkUser } from "@/lib/userDb";
-import Link from 'next/link';
+import Link from "next/link";
 
 export default async function BackgroundVideo() {
   const user = await checkUser();
@@ -20,9 +21,14 @@ export default async function BackgroundVideo() {
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-white">
         <div className="text-4xl font-bold mb-4">
           {user ? (
-            <h2 className='text-center'>Welcome to PropertyPulse </h2>
+            <h2 className="text-center">Welcome to PropertyPulse </h2>
           ) : (
-            <h2><Link className='hover:underline' href="/sign-in">Sign in</Link> to get started</h2>
+            <h2>
+              <Link className="hover:underline" href="/sign-in">
+                Sign in
+              </Link>{" "}
+              to get started
+            </h2>
           )}
         </div>
         <p className="text-lg mb-8">
